@@ -9,6 +9,7 @@ export const magic = new Magic('pk_live_FAE58C542213B8AF', {
       chainId,
       networkId,
       network: 'testnet',
+      createAccountsOnChain: false,
     }),
   ],
 });
