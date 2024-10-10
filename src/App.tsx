@@ -25,18 +25,26 @@ function App() {
       setIsLoggedIn(magicIsLoggedIn);
       console.log("magicIsLoggedIn", magicIsLoggedIn);
       if (magicIsLoggedIn) {
-        const userInfo = await getUserInfo();
-        getBalance(userInfo.publicAddress as AccountName);
+        try {
+          const userInfo = await getUserInfo();
+          getBalance(userInfo.publicAddress as AccountName);
+        } catch (error) {
+          console.error(error);
+        }
       }
-    });
+    }).catch(console.error);
   }, []);
 
   const login = async () => {
-    await magic.auth.loginWithEmailOTP({ email });
-    setIsLoggedIn(true);
-
-    const userInfo = await getUserInfo();
-    getBalance(userInfo.publicAddress as AccountName);
+    try {
+      await magic.auth.loginWithEmailOTP({ email });
+      setIsLoggedIn(true);
+  
+      const userInfo = await getUserInfo();
+      getBalance(userInfo.publicAddress as AccountName);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const getUserInfo = async () => {
@@ -65,8 +73,12 @@ function App() {
   };
 
   const logout = async () => {
-    await magic.user.logout();
-    setIsLoggedIn(false);
+    try {
+      await magic.user.logout();
+      setIsLoggedIn(false);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const handleSendTransaction = async () => {
