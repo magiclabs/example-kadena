@@ -95,7 +95,15 @@ function App() {
         keys: [receiverPublicKey],
         pred: "keys-all",
       })
-      .addSigner(senderPublicKey, (withCapability) => [withCapability("coin.GAS")])
+      .addSigner(senderPublicKey, (withCapability) => [
+        withCapability("coin.GAS"),
+        withCapability(
+          "coin.TRANSFER",
+          userMetadata.publicAddress,
+          toAccount,
+          amount
+        ),
+      ])
       .setMeta({ chainId, senderAccount: userMetadata.publicAddress })
       .setNetworkId(networkId)
       .createTransaction();
