@@ -1,15 +1,18 @@
 import { Magic } from 'magic-sdk';
 import { KadenaExtension } from '@magic-ext/kadena'
-import { chainId, rpcUrl, networkId } from './utils';
+import { getRpcUrl, DEFAULT_CHAIN_ID, NETWORK_ID } from './utils';
+import { ChainId } from '@kadena/types';
 
-export const magic = new Magic('pk_live_FAE58C542213B8AF', {
-  extensions: [
-    new KadenaExtension({
-      rpcUrl,
-      chainId,
-      networkId,
-      network: 'testnet',
-      createAccountsOnChain: false,
-    }),
-  ],
-});
+export const createMagic = (chainId?: ChainId) => {
+  return new Magic('pk_live_FAE58C542213B8AF', {
+    extensions: [
+      new KadenaExtension({
+        rpcUrl: getRpcUrl(chainId),
+        chainId: chainId || DEFAULT_CHAIN_ID,
+        networkId: NETWORK_ID,
+        network: 'testnet',
+        createAccountsOnChain: true,
+      }),
+    ],
+  })
+}

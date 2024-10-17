@@ -5,6 +5,7 @@
   "dependencies": {
     "@kadena/client": "^1.14.0",
     "@kadena/pactjs": "^0.4.3",
+    "@kadena/types": "^0.7.0",
     "@magic-ext/kadena": "^0.2.0",
     "@types/jest": "^27.0.1",
     "@types/node": "^16.7.13",
