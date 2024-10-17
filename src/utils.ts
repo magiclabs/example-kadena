@@ -1,7 +1,7 @@
-import { createClient } from "@kadena/client";
+import { ChainId, createClient } from "@kadena/client";
 
-export const chainId = '1';
-export const networkId = 'testnet04';
-export const rpcUrl = `https://api.testnet.chainweb.com/chainweb/0.0/${networkId}/chain/${chainId}/pact`;
+export const DEFAULT_CHAIN_ID = '1';
+export const NETWORK_ID = 'testnet04';
 
-export const kadenaClient = createClient(rpcUrl);
+export const getRpcUrl = (chainId?: ChainId) => `https://api.testnet.chainweb.com/chainweb/0.0/${NETWORK_ID}/chain/${chainId || DEFAULT_CHAIN_ID}/pact`;
+export const getKadenaClient = (chainId?: ChainId) => createClient(getRpcUrl(chainId || DEFAULT_CHAIN_ID));
