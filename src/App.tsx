@@ -27,7 +27,6 @@ function App() {
 
   // Cross Chain Transaction
   const [xDisabled, setXDisabled] = useState(false);
-  const [xToAccount, setXToAccount] = useState("");
   const [xSendAmount, setXSendAmount] = useState("");
   const [xChainId, setXChainId] = useState<ChainId | string>('');
 
@@ -83,13 +82,13 @@ function App() {
         .execution((Pact.modules as any).coin["get-balance"](accountName))
         .setMeta({ chainId: selectedChainId })
         .createTransaction();
-      const { result } = await kadenaClient.dirtyRead(transaction);
-      if (result.status === "failure") {
-        console.error('Failed to get balance:', result.error);
+      const response = await kadenaClient.dirtyRead(transaction);
+      if (response.result.status === "failure") {
+        console.error('Failed to get balance:', response.result.error);
         setBalance(0);
         return;
       }
-      setBalance((result as any).data as number);
+      setBalance((response.result as any).data as number);
     } catch (error) {
       console.error("Failed to get balance:", error);
     }
@@ -108,16 +107,17 @@ function App() {
         .setMeta({ chainId: selectedChainId })
         .setNetworkId(NETWORK_ID)
         .createTransaction();
-      const { result } = await kadenaClient.dirtyRead(transaction);
-      if (result.status === "failure") {
-        console.error((result.error as any).message);
+      const response = await kadenaClient.dirtyRead(transaction);
+      if (response.result.status === "failure") {
+        console.error((response.result.error as any).message);
         return false;
       } else {
-        console.log(result.data);
+        console.log(response.result.data);
         return true;
       }
     } catch (error) {
-      console.error("Failed to get account details", error);
+      console.error(`Failed to get balance for ${account} on chain ${selectedChainId}`);
+      console.error(error);
     }
   };
 
@@ -194,12 +194,12 @@ function App() {
       console.log("signed transaction", signedTx);
       const transactionDescriptor = await kadenaClient.submit(signedTx as ICommand);
       console.log("broadcasting transaction...", transactionDescriptor);
-      const { result } = await kadenaClient.listen(transactionDescriptor);
+      const response = await kadenaClient.listen(transactionDescriptor);
       setDisabled(false);
-      if (result.status === "failure") {
-        console.error(result.error);
+      if (response.result.status === "failure") {
+        console.error(response.result.error);
       } else {
-        console.log(result);
+        console.log('transaction success! response:', response);
         getBalance(userInfo.publicAddress as AccountName);
       }
     } catch (error) {
@@ -213,14 +213,14 @@ function App() {
     setXDisabled(true);
     const kadenaClient = getKadenaClient(selectedChainId);
     const amount = new PactNumber(xSendAmount).toPactDecimal();
-    const senderPublicKey = userInfo?.publicAddress.substring(2);
-    const receiverPublicKey = xToAccount.substring(2);
+    const senderPublicKey = userInfo.publicAddress.substring(2);
+    const receiverPublicKey = userInfo.publicAddress.substring(2);
 
     let transaction = Pact.builder
       .execution(
         (Pact.modules as any).coin.defpact['transfer-crosschain'](
           userInfo.publicAddress,
-          xToAccount,
+          userInfo.publicAddress,
           readKeyset('receiver-guard'),
           xChainId,
           amount,
@@ -231,7 +231,7 @@ function App() {
         signFor(
           'coin.TRANSFER_XCHAIN',
           userInfo.publicAddress,
-          xToAccount,
+          userInfo.publicAddress,
           amount,
           xChainId,
         ),
@@ -247,11 +247,11 @@ function App() {
       console.log("signed transaction", signedTx);
       const transactionDescriptor = await kadenaClient.submit(signedTx as ICommand);
       console.log("broadcasting transaction...", transactionDescriptor);
-      const { result } = await kadenaClient.listen(transactionDescriptor);
-      if (result.status === "failure") {
-        console.error(result.error);
+      const response = await kadenaClient.listen(transactionDescriptor);
+      if (response.result.status === "failure") {
+        console.error(response.result.error);
       } else {
-        console.log('Transaction start result: success!', result);
+        console.log('transaction start success! response:', response);
         getBalance(userInfo.publicAddress as AccountName);
         await handleSendXTransactionFinish(transactionDescriptor);
       }
@@ -288,12 +288,12 @@ function App() {
         .createTransaction();
       const continuationTxDescriptor = await kadenaClientTargetChain.submit(continuationTransaction as ICommand);
       console.log('broadcasting continuation transaction...', continuationTxDescriptor);
-      const { result } = await kadenaClientTargetChain.listen(continuationTxDescriptor);
+      const response = await kadenaClientTargetChain.listen(continuationTxDescriptor);
       setXDisabled(false);
-      if (result.status === "failure") {
-        console.error(result.error);
+      if (response.result.status === "failure") {
+        console.error(response.result.error);
       } else {
-        console.log('Transaction continuation result: success!', result);
+        console.log('transaction continuation success! response:', response);
       }
     } catch (error) {
       setXDisabled(false);
@@ -303,13 +303,16 @@ function App() {
 
   const ChainIdSelector = () => {
     return (
-      <select value={selectedChainId} onChange={(e) => handleChainIdChange(e.target.value as ChainId)}>
-        {Array.from({ length: 20 }, (_, i) => (
-          <option key={i} value={i}>
-            {i}
-          </option>
-        ))}
-      </select>
+      <div className="info">
+        <label>Select ChainId:{" "}</label>
+        <select value={selectedChainId} onChange={(e) => handleChainIdChange(e.target.value as ChainId)}>
+          {Array.from({ length: 20 }, (_, i) => (
+            <option key={i} value={i}>
+              {i}
+            </option>
+          ))}
+        </select>
+      </div>
     );
   };
 
@@ -320,7 +323,6 @@ function App() {
           <h1>Please sign up or login</h1>
           <input
             type="email"
-            className="full-width"
             placeholder="Enter your email"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
@@ -334,8 +336,9 @@ function App() {
             <button onClick={logout}>Logout</button>
           </div>
           <div className="container">
-            <h1>Select Chain ID</h1>
+            <h1>Network Details</h1>
             <ChainIdSelector />
+            <div style={{ marginTop: '1rem' }} className="info">Network: {NETWORK_ID}</div>
           </div>
           <div className="container">
             <h1>Kadena Account</h1>
@@ -351,10 +354,7 @@ function App() {
             <button onClick={() => getAccountDetails(userInfo?.publicAddress as AccountName)}>
               Log Account Details
             </button>
-          </div>
-          <div className="container">
-            <h1>Balance</h1>
-            <div className="info">Balance: {balance} KDA</div>
+            <div style={{ marginTop: '1rem' }} className="info">Balance: {balance} KDA</div>
             <button onClick={() => getBalance(userInfo?.publicAddress as AccountName)}>
               Refresh Balance
             </button>
@@ -390,14 +390,7 @@ function App() {
             </button>
           </div>
           <div className="container">
-            <h1>Cross Chain Transfer</h1>
-            <input
-              type="text"
-              className="full-width"
-              placeholder="To account (k:123...)"
-              value={xToAccount}
-              onChange={(event) => setXToAccount(event.target.value)}
-            />
+            <h1>Send Kadena (cross chain)</h1>
             <input
               type="text"
               className="full-width"
