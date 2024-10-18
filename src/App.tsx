@@ -27,6 +27,7 @@ function App() {
 
   // Cross Chain Transaction
   const [xDisabled, setXDisabled] = useState(false);
+  const [toXAccount, setXToAccount] = useState("");
   const [xSendAmount, setXSendAmount] = useState("");
   const [xChainId, setXChainId] = useState<ChainId | string>('');
 
@@ -214,13 +215,13 @@ function App() {
     const kadenaClient = getKadenaClient(selectedChainId);
     const amount = new PactNumber(xSendAmount).toPactDecimal();
     const senderPublicKey = userInfo.publicAddress.substring(2);
-    const receiverPublicKey = userInfo.publicAddress.substring(2);
+    const receiverPublicKey = toXAccount.substring(2);
 
     let transaction = Pact.builder
       .execution(
         (Pact.modules as any).coin.defpact['transfer-crosschain'](
           userInfo.publicAddress,
-          userInfo.publicAddress,
+          toXAccount,
           readKeyset('receiver-guard'),
           xChainId,
           amount,
@@ -231,7 +232,7 @@ function App() {
         signFor(
           'coin.TRANSFER_XCHAIN',
           userInfo.publicAddress,
-          userInfo.publicAddress,
+          toXAccount,
           amount,
           xChainId,
         ),
@@ -391,6 +392,13 @@ function App() {
           </div>
           <div className="container">
             <h1>Send Kadena (cross chain)</h1>
+            <input
+              type="text"
+              className="full-width"
+              placeholder="To account (k:123...)"
+              value={toXAccount}
+              onChange={(event) => setXToAccount(event.target.value)}
+            />
             <input
               type="text"
               className="full-width"
