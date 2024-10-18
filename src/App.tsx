@@ -1,38 +1,50 @@
-import { addSignatures, Pact } from "@kadena/client";
+import { addSignatures, ITransactionDescriptor, Pact, readKeyset } from "@kadena/client";
 import { PactNumber } from "@kadena/pactjs";
 import { MagicUserMetadata } from "magic-sdk";
 import { useEffect, useState } from "react";
-import { magic } from "./magic";
-import { chainId, kadenaClient, networkId } from "./utils";
+import { createMagic } from "./magic";
+import { getKadenaClient, DEFAULT_CHAIN_ID, NETWORK_ID } from "./utils";
 import { ReactComponent as ExternalLinkSVG } from "./external-link.svg";
+import { ChainId, ICommand, IPactDecimal, IUnsignedCommand } from '@kadena/types';
 import "./App.css";
 
 type AccountName = `k:${string}`;
 
 function App() {
+  const [magic, setMagic] = useState(createMagic());
+  const [selectedChainId, setSelectedChainId] = useState<ChainId>(DEFAULT_CHAIN_ID);
+
+  // User
   const [email, setEmail] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userMetadata, setUserMetadata] = useState<MagicUserMetadata | undefined>();
-
+  const [userInfo, setUserInfo] = useState<MagicUserMetadata | undefined>();
   const [balance, setBalance] = useState(0);
 
+  // Same Chain Transaction
   const [disabled, setDisabled] = useState(false);
   const [toAccount, setToAccount] = useState("");
   const [sendAmount, setSendAmount] = useState("");
 
+  // Cross Chain Transaction
+  const [xDisabled, setXDisabled] = useState(false);
+  const [xSendAmount, setXSendAmount] = useState("");
+  const [xChainId, setXChainId] = useState<ChainId | string>('');
+
   useEffect(() => {
-    magic.user.isLoggedIn().then(async (magicIsLoggedIn) => {
-      setIsLoggedIn(magicIsLoggedIn);
-      console.log("magicIsLoggedIn", magicIsLoggedIn);
-      if (magicIsLoggedIn) {
-        try {
+    const initAppState = async () => {
+      try {
+        const magicIsLoggedIn = await magic.user.isLoggedIn();
+        console.log("magicIsLoggedIn", magicIsLoggedIn);
+        setIsLoggedIn(magicIsLoggedIn);
+        if (magicIsLoggedIn) {
           const userInfo = await getUserInfo();
           getBalance(userInfo.publicAddress as AccountName);
-        } catch (error) {
-          console.error(error);
         }
+      } catch (error) {
+        console.error(error);
       }
-    }).catch(console.error);
+    };
+    initAppState();
   }, []);
 
   const login = async () => {
@@ -47,31 +59,6 @@ function App() {
     }
   };
 
-  const getUserInfo = async () => {
-    const metadata = await magic.user.getInfo();
-    console.log("metadata", metadata);
-    setUserMetadata(metadata);
-    return metadata;
-  };
-
-  const getBalance = async (accountName: AccountName) => {
-    try {
-      const transaction = Pact.builder
-        .execution((Pact.modules as any).coin["get-balance"](accountName))
-        .setMeta({ chainId })
-        .createTransaction();
-      const res = await kadenaClient.local(transaction, { preflight: false });
-      if (res.result.status === "failure") {
-        console.error('Failed to get balance:', res.result.error);
-        setBalance(0);
-        return;
-      }
-      setBalance((res.result as any).data as number);
-    } catch (error) {
-      console.error("Failed to get balance:", error);
-    }
-  };
-
   const logout = async () => {
     try {
       await magic.user.logout();
@@ -81,53 +68,252 @@ function App() {
     }
   };
 
-  const handleSendTransaction = async () => {
-    if (!userMetadata?.publicAddress) return;
-    setDisabled(true);
+  const getUserInfo = async () => {
+    const user = await magic.user.getInfo();
+    console.log("user", user);
+    setUserInfo(user);
+    return user;
+  };
 
-    const senderPublicKey = userMetadata.publicAddress.substring(2);
-    const receiverPublicKey = toAccount.substring(2);
-    const amount = new PactNumber(sendAmount).toPactDecimal();
+  const getBalance = async (accountName: AccountName) => {
+    const kadenaClient = getKadenaClient(selectedChainId);
+    try {
+      const transaction = Pact.builder
+        .execution((Pact.modules as any).coin["get-balance"](accountName))
+        .setMeta({ chainId: selectedChainId })
+        .createTransaction();
+      const response = await kadenaClient.dirtyRead(transaction);
+      if (response.result.status === "failure") {
+        console.error('Failed to get balance:', response.result.error);
+        setBalance(0);
+        return;
+      }
+      setBalance((response.result as any).data as number);
+    } catch (error) {
+      console.error("Failed to get balance:", error);
+    }
+  };
 
-    const transaction = Pact.builder
-      .execution((Pact.modules as any).coin.transfer(userMetadata.publicAddress, toAccount, amount))
+  const handleChainIdChange = (cid: ChainId) => {
+    setSelectedChainId(cid);
+    setMagic(createMagic(cid));
+  }
+
+  const getAccountDetails = async (account: AccountName) => {
+    const kadenaClient = getKadenaClient(selectedChainId);
+    try {
+      const transaction = Pact.builder
+        .execution((Pact.modules as any).coin.details(account))
+        .setMeta({ chainId: selectedChainId })
+        .setNetworkId(NETWORK_ID)
+        .createTransaction();
+      const response = await kadenaClient.dirtyRead(transaction);
+      if (response.result.status === "failure") {
+        console.error((response.result.error as any).message);
+        return false;
+      } else {
+        console.log(response.result.data);
+        return true;
+      }
+    } catch (error) {
+      console.error(`Failed to get balance for ${account} on chain ${selectedChainId}`);
+      console.error(error);
+    }
+  };
+
+  const buildTransferTransaction = (from: AccountName, to: AccountName, amount: IPactDecimal) => {
+    const senderPublicKey = from.substring(2);
+    const receiverPublicKey = to.substring(2);
+    return Pact.builder
+      .execution((Pact.modules as any).coin.transfer(from, to, amount))
       .addData("receiverKeyset", {
         keys: [receiverPublicKey],
         pred: "keys-all",
       })
-      .addSigner(senderPublicKey, (withCapability) => [
+      .addSigner(senderPublicKey, (withCapability: any) => [
         withCapability("coin.GAS"),
         withCapability(
           "coin.TRANSFER",
-          userMetadata.publicAddress,
+          from,
           toAccount,
           amount
         ),
       ])
-      .setMeta({ chainId, senderAccount: userMetadata.publicAddress })
-      .setNetworkId(networkId)
+      .setMeta({ chainId: selectedChainId, senderAccount: from })
+      .setNetworkId(NETWORK_ID)
       .createTransaction();
+  };
 
+  const buildTransferCreateTransaction = (from: AccountName, to: AccountName, amount: IPactDecimal) => {
+    const senderPublicKey = from.substring(2);
+    const receiverPublicKey = to.substring(2);
+    return Pact.builder
+      .execution((Pact.modules as any).coin["transfer-create"](
+        from, 
+        to, 
+        '(read-keyset "receiverKeyset")',
+        amount
+      ))
+      .addData("receiverKeyset", {
+        keys: [receiverPublicKey],
+        pred: "keys-all",
+      })
+      .addSigner(senderPublicKey, (withCapability: any) => [
+        withCapability("coin.GAS"),
+        withCapability(
+          "coin.TRANSFER",
+          from,
+          toAccount,
+          amount
+        ),
+      ])
+      .setMeta({ chainId: selectedChainId, senderAccount: from })
+      .setNetworkId(NETWORK_ID)
+      .createTransaction();
+  }
+
+  const handleSendTransaction = async () => {
+    if (!userInfo?.publicAddress) return;
+    setDisabled(true);
+    const kadenaClient = getKadenaClient(selectedChainId);
     try {
-      console.log("unsigned transaction", transaction);
+      const accountExists = await getAccountDetails(toAccount as AccountName);
+      const amount = new PactNumber(sendAmount).toPactDecimal();
+
+      let transaction: IUnsignedCommand;
+
+      if (accountExists) {
+        transaction = await buildTransferTransaction(userInfo.publicAddress as AccountName, toAccount as AccountName, amount);
+      } else {
+        transaction = await buildTransferCreateTransaction(userInfo.publicAddress as AccountName, toAccount as AccountName, amount);
+      }
+
+      console.log(accountExists ? 'account exists, sending `transfer` tx' : 'account does not exist, sending `transfer-create` tx');
       const signature = await magic.kadena.signTransaction(transaction.hash);
-      console.log("signature", signature);
       const signedTx = addSignatures(transaction, signature);
       console.log("signed transaction", signedTx);
-      const transactionDescriptor = await kadenaClient.submit(signedTx);
+      const transactionDescriptor = await kadenaClient.submit(signedTx as ICommand);
       console.log("broadcasting transaction...", transactionDescriptor);
       const response = await kadenaClient.listen(transactionDescriptor);
       setDisabled(false);
       if (response.result.status === "failure") {
         console.error(response.result.error);
       } else {
-        getBalance(userMetadata.publicAddress as AccountName);
-        console.log(response.result);
+        console.log('transaction success! response:', response);
+        getBalance(userInfo.publicAddress as AccountName);
       }
     } catch (error) {
       console.error("Failed to send transaction", error);
       setDisabled(false);
     }
+  };
+
+  const handleSendXTransactionStart = async () => {
+    if (!userInfo?.publicAddress) return;
+    setXDisabled(true);
+    const kadenaClient = getKadenaClient(selectedChainId);
+    const amount = new PactNumber(xSendAmount).toPactDecimal();
+    const senderPublicKey = userInfo.publicAddress.substring(2);
+    const receiverPublicKey = userInfo.publicAddress.substring(2);
+
+    let transaction = Pact.builder
+      .execution(
+        (Pact.modules as any).coin.defpact['transfer-crosschain'](
+          userInfo.publicAddress,
+          userInfo.publicAddress,
+          readKeyset('receiver-guard'),
+          xChainId,
+          amount,
+        ),
+      )
+      .addSigner(senderPublicKey, (signFor: any) => [
+        signFor('coin.GAS'),
+        signFor(
+          'coin.TRANSFER_XCHAIN',
+          userInfo.publicAddress,
+          userInfo.publicAddress,
+          amount,
+          xChainId,
+        ),
+      ])
+      .addKeyset('receiver-guard', 'keys-all', receiverPublicKey)
+      .setMeta({ chainId: selectedChainId, senderAccount: userInfo.publicAddress })
+      .setNetworkId(NETWORK_ID)
+      .createTransaction();
+
+    try {
+      const signature = await magic.kadena.signTransaction(transaction.hash);
+      const signedTx = addSignatures(transaction, signature);
+      console.log("signed transaction", signedTx);
+      const transactionDescriptor = await kadenaClient.submit(signedTx as ICommand);
+      console.log("broadcasting transaction...", transactionDescriptor);
+      const response = await kadenaClient.listen(transactionDescriptor);
+      if (response.result.status === "failure") {
+        console.error(response.result.error);
+      } else {
+        console.log('transaction start success! response:', response);
+        getBalance(userInfo.publicAddress as AccountName);
+        await handleSendXTransactionFinish(transactionDescriptor);
+      }
+    } catch (error) {
+      console.error("Failed to send transaction", error);
+      setXDisabled(false);
+    }
+  };
+
+  const handleSendXTransactionFinish = async (transactionDescriptor: ITransactionDescriptor) => {
+    if (!userInfo?.publicAddress) return;
+    const kadenaClientStartingChain = getKadenaClient(selectedChainId);
+    const kadenaClientTargetChain = getKadenaClient(xChainId as ChainId);
+    try {
+      console.log('fetching proof for cross-chain transaction...');
+      const proof = await kadenaClientStartingChain.pollCreateSpv(transactionDescriptor, xChainId as ChainId);
+      const status = await kadenaClientStartingChain.listen(transactionDescriptor);
+      console.log('status', status);
+      const pactId = status.continuation?.pactId ?? '';
+
+      const continuationTransaction = Pact.builder
+        .continuation({
+          pactId,
+          proof,
+          rollback: false,
+          step: 1,
+        })
+        .setNetworkId(NETWORK_ID)
+        .setMeta({
+          chainId: xChainId as ChainId,
+          senderAccount: 'kadena-xchain-gas',
+          gasLimit: 850, // maximum value
+        })
+        .createTransaction();
+      const continuationTxDescriptor = await kadenaClientTargetChain.submit(continuationTransaction as ICommand);
+      console.log('broadcasting continuation transaction...', continuationTxDescriptor);
+      const response = await kadenaClientTargetChain.listen(continuationTxDescriptor);
+      setXDisabled(false);
+      if (response.result.status === "failure") {
+        console.error(response.result.error);
+      } else {
+        console.log('transaction continuation success! response:', response);
+      }
+    } catch (error) {
+      setXDisabled(false);
+      console.error("Failed to complete cross-chain transaction", error);
+    }
+  };
+
+  const ChainIdSelector = () => {
+    return (
+      <div className="info">
+        <label>Select ChainId:{" "}</label>
+        <select value={selectedChainId} onChange={(e) => handleChainIdChange(e.target.value as ChainId)}>
+          {Array.from({ length: 20 }, (_, i) => (
+            <option key={i} value={i}>
+              {i}
+            </option>
+          ))}
+        </select>
+      </div>
+    );
   };
 
   return (
@@ -137,17 +323,22 @@ function App() {
           <h1>Please sign up or login</h1>
           <input
             type="email"
-            name="email"
             placeholder="Enter your email"
-            onChange={event => setEmail(event.target.value)}
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
           />
           <button onClick={login}>Login</button>
         </div>
       ) : (
         <div>
           <div className="container">
-            <h1>Current user: {userMetadata?.email}</h1>
+            <h1>Current user: {userInfo?.email}</h1>
             <button onClick={logout}>Logout</button>
+          </div>
+          <div className="container">
+            <h1>Network Details</h1>
+            <ChainIdSelector />
+            <div style={{ marginTop: '1rem' }} className="info">Network: {NETWORK_ID}</div>
           </div>
           <div className="container">
             <h1>Kadena Account</h1>
@@ -155,12 +346,18 @@ function App() {
               <a
                 target="_blank"
                 rel="noopener noreferrer"
-                href={`https://explorer.chainweb.com/testnet/account/${userMetadata?.publicAddress}`}
+                href={`https://explorer.chainweb.com/testnet/account/${userInfo?.publicAddress}`}
               >
-                {userMetadata?.publicAddress}
+                {userInfo?.publicAddress}
               </a>
             </div>
-            <div className="info">Balance: {balance} KDA</div>
+            <button onClick={() => getAccountDetails(userInfo?.publicAddress as AccountName)}>
+              Log Account Details
+            </button>
+            <div style={{ marginTop: '1rem' }} className="info">Balance: {balance} KDA</div>
+            <button onClick={() => getBalance(userInfo?.publicAddress as AccountName)}>
+              Refresh Balance
+            </button>
             <a
               href="https://tools.kadena.io/faucet/new"
               target="_blank"
@@ -173,25 +370,43 @@ function App() {
             </a>
           </div>
           <div className="container">
-            <h1>Send Kadena</h1>
+            <h1>Send Kadena (same chain)</h1>
             <input
               type="text"
-              name="to"
               className="full-width"
               placeholder="To account (k:123...)"
               value={toAccount}
-              onChange={event => setToAccount(event.target.value)}
+              onChange={(event) => setToAccount(event.target.value)}
             />
             <input
               type="text"
-              name="amount"
               className="full-width"
               placeholder="Amount in KDA"
               value={sendAmount}
-              onChange={event => setSendAmount(event.target.value)}
+              onChange={(event) => setSendAmount(event.target.value)}
             />
             <button disabled={disabled} onClick={handleSendTransaction}>
               {disabled ? "sending..." : "Send Transaction"}
+            </button>
+          </div>
+          <div className="container">
+            <h1>Send Kadena (cross chain)</h1>
+            <input
+              type="text"
+              className="full-width"
+              placeholder="Amount in KDA"
+              value={xSendAmount}
+              onChange={(event) => setXSendAmount(event.target.value)}
+            />
+            <input
+              type="text"
+              className="full-width"
+              placeholder="Destination Chain ID"
+              value={xChainId}
+              onChange={(event) => setXChainId(event.target.value)}
+            />
+            <button disabled={xDisabled} onClick={handleSendXTransactionStart}>
+              {xDisabled ? "sending..." : "Send Transaction"}
             </button>
           </div>
         </div>
