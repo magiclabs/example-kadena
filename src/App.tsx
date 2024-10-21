@@ -152,7 +152,7 @@ function App() {
       .execution((Pact.modules as any).coin["transfer-create"](
         from, 
         to, 
-        '(read-keyset "receiverKeyset")',
+        readKeyset("receiverKeyset"),
         amount
       ))
       .addData("receiverKeyset", {
