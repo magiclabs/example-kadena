@@ -5,7 +5,6 @@
   "dependencies": {
     "@kadena/client": "^1.14.0",
     "@kadena/pactjs": "^0.4.3",
-    "@kadena/spirekey-sdk": "^1.0.0",
     "@kadena/types": "^0.7.0",
     "@magic-ext/kadena": "0.7.0-canary.835.11809124232.0",
     "@types/jest": "^27.0.1",

@@ -17,7 +17,6 @@ import {
   IUnsignedCommand,
 } from "@kadena/types";
 import "./App.css";
-import { sign, SignedTransactions } from "@kadena/spirekey-sdk";
 
 type AccountName = `k:${string}`;
 
