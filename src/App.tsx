@@ -1,7 +1,7 @@
 import { addSignatures, ITransactionDescriptor } from "@kadena/client";
 import { PactNumber } from "@kadena/pactjs";
 import { useEffect, useState } from "react";
-import { KadenaUserMetadata } from "@magic-ext/kadena/dist/types/types";
+import { KadenaUserMetadata, KdaSignedCommand } from "@magic-ext/kadena/dist/types/types";
 import { createMagic } from "./magic";
 import { DEFAULT_CHAIN_ID, NETWORK_ID } from "./utils/constants";
 import { ReactComponent as ExternalLinkSVG } from "./external-link.svg";
@@ -94,7 +94,7 @@ function App() {
   };
 
   const getUserInfo = () => {
-    return magic.kadena.getInfo();
+    return magic.kadena.getUserInfo();
   };
 
   const logout = async () => {
@@ -142,12 +142,10 @@ function App() {
     const isSpireKeyLogin = Boolean(userInfo?.spireKeyInfo);
 
     if (isSpireKeyLogin) {
-      // TODO: update type
-      const signature = await magic.kadena.signTransactionWithSpireKey(transaction as any);
+      const signature = await magic.kadena.signTransactionWithSpireKey(transaction);
       return addSignatures(
         transaction,
-        // TODO: update type
-        ...(signature as any).transactions[0].sigs
+        ...(signature.transactions[0] as KdaSignedCommand).sigs
       );
     } else {
       const signature = await magic.kadena.signTransaction(transaction.hash);
@@ -169,7 +167,6 @@ function App() {
       const signedTx = await signTransaction(transaction);
       console.log("signed transaction", signedTx);
 
-      // TODO: update type
       const transactionDescriptor = await kadenaClient.submit(signedTx as ICommand);
       console.log("broadcasting transaction...", transactionDescriptor);
 
@@ -222,7 +219,6 @@ function App() {
       const signedTx = await signTransaction(transaction);
       console.log("signed transaction", signedTx);
 
-      // TODO: update type
       const transactionDescriptor = await kadenaClient.submit(signedTx as ICommand);
       console.log("broadcasting transaction...", transactionDescriptor);
 
