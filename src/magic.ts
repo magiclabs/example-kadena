@@ -6,7 +6,6 @@ import { getRpcUrl } from "./utils/get-rpc-url";
 
 export const createMagic = (chainId?: ChainId) => {
   return new Magic("pk_live_9E8549A61DB458BA", {
-    endpoint: "http://localhost:3024", // TODO: remove
     extensions: [
       new KadenaExtension({
         rpcUrl: getRpcUrl(chainId),
