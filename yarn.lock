@@ -1859,10 +1859,10 @@
   resolved "https://registry.npmjs.org/@leichtgewicht/ip-codec/-/ip-codec-2.0.5.tgz"
   integrity sha512-Vo+PSpZG2/fmgmiNzYK9qWRh8h/CHrwD0mo1h1DzL4yzHNSfWYujGTYsWGreD000gcgmZ7K4Ys6Tx9TxtsKdDw==
 
-"@magic-ext/kadena@0.9.0-canary.835.12168660550.0":
-  version "0.9.0-canary.835.12168660550.0"
-  resolved "https://registry.yarnpkg.com/@magic-ext/kadena/-/kadena-0.9.0-canary.835.12168660550.0.tgz#90a62aa709b12dcced3eb28b4803fd81a07c9bc3"
-  integrity sha512-XERkvHK6Fi0wEXWibCLqseSwVbJI3gSnbMqGNWb5oc5twGun9XWB9aVyp0nfJZ3bfii+/Br7f3xUByRkLiS8sw==
+"@magic-ext/kadena@0.9.0-canary.835.12185340364.0":
+  version "0.9.0-canary.835.12185340364.0"
+  resolved "https://registry.yarnpkg.com/@magic-ext/kadena/-/kadena-0.9.0-canary.835.12185340364.0.tgz#afbd9ad314708c6684d03297a5257cc174079070"
+  integrity sha512-AATr6mAau9qNagcZu/o1Fhdsp+RAqjmoVrt+klVW78PO0z8tIQ5Uq+3n6dnxdaHK6gu4UJRnLo2v01mQwvuPzg==
 
 "@magic-sdk/commons@24.18.0-canary.835.11980874875.0":
   version "24.18.0-canary.835.11980874875.0"

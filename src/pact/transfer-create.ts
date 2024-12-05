@@ -9,6 +9,7 @@ interface TransferCreateTransaction {
   chainId: ChainId;
   senderPubKey: string;
   receiverPubKey: string;
+  isSpireKeyAccount: boolean;
 }
 
 export const buildTransferCreateTransaction = ({
@@ -18,8 +19,8 @@ export const buildTransferCreateTransaction = ({
   chainId,
   senderPubKey,
   receiverPubKey,
+  isSpireKeyAccount,
 }: TransferCreateTransaction) => {
-  const isSpireKeyAccount = senderPubKey.startsWith("k:");
 
   const signer: ISigner = isSpireKeyAccount
     ? {

@@ -1,4 +1,5 @@
 import { ChainId, Pact } from "@kadena/client";
+import { NETWORK_ID } from "../utils/constants";
 
 interface GetBalanceTransaction {
   chainId: ChainId;
@@ -12,6 +13,6 @@ export const buildGetBalanceTransaction = ({
   return Pact.builder
     .execution((Pact.modules as any).coin["get-balance"](accountName))
     .setMeta({ chainId })
-    // .setNetworkId(NETWORK_ID)
+    .setNetworkId(NETWORK_ID)
     .createTransaction();
 };

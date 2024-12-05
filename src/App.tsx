@@ -1,7 +1,7 @@
 import { addSignatures, ITransactionDescriptor } from "@kadena/client";
 import { PactNumber } from "@kadena/pactjs";
 import { useEffect, useState } from "react";
-import { KadenaUserMetadata, KdaSignedCommand } from "@magic-ext/kadena/dist/types/types";
+import { KadenaUserMetadata, SignedCommand } from "@magic-ext/kadena/dist/types/types";
 import { createMagic } from "./magic";
 import { DEFAULT_CHAIN_ID, NETWORK_ID } from "./utils/constants";
 import { ReactComponent as ExternalLinkSVG } from "./external-link.svg";
@@ -116,6 +116,7 @@ function App() {
     const chainId = selectedChainId;
     const senderPubKey = userInfo?.publicKey as string;
     const receiverPubKey = accountToPublicKey(to);
+    const isSpireKeyAccount = Boolean(userInfo?.loginType === "spirekey");
 
     if (accountExists) {
       return buildTransferTransaction({
@@ -125,6 +126,7 @@ function App() {
         chainId,
         senderPubKey,
         receiverPubKey,
+        isSpireKeyAccount,
       });
     }
 
@@ -135,17 +137,18 @@ function App() {
       chainId,
       senderPubKey,
       receiverPubKey,
+      isSpireKeyAccount,
     });
   };
 
   const signTransaction = async (transaction: IUnsignedCommand) => {
-    const isSpireKeyLogin = Boolean(userInfo?.spireKeyInfo);
+    const isSpireKeyLogin = Boolean(userInfo?.loginType === "spirekey");
 
     if (isSpireKeyLogin) {
       const signature = await magic.kadena.signTransactionWithSpireKey(transaction);
       return addSignatures(
         transaction,
-        ...(signature.transactions[0] as KdaSignedCommand).sigs
+        ...(signature.transactions[0] as SignedCommand).sigs
       );
     } else {
       const signature = await magic.kadena.signTransaction(transaction.hash);
@@ -193,6 +196,7 @@ function App() {
     const fromChainId = selectedChainId;
     const senderPubKey = userInfo?.publicKey as string;
     const receiverPubKey = accountToPublicKey(to);
+    const isSpireKeyAccount = Boolean(userInfo?.loginType === "spirekey");
 
     return buildTransferCrosschainTransaction({
       to,
@@ -202,6 +206,7 @@ function App() {
       fromChainId,
       senderPubKey,
       receiverPubKey,
+      isSpireKeyAccount,
     });
   };
 
@@ -209,7 +214,7 @@ function App() {
   const handleSendXTransactionStart = async () => {
     if (!userInfo?.accountName) return;
 
-    setXDisabled(true);
+    // setXDisabled(true);
 
     try {
       const kadenaClient = getKadenaClient(selectedChainId);
@@ -219,18 +224,21 @@ function App() {
       const signedTx = await signTransaction(transaction);
       console.log("signed transaction", signedTx);
 
-      const transactionDescriptor = await kadenaClient.submit(signedTx as ICommand);
-      console.log("broadcasting transaction...", transactionDescriptor);
+      const localRes = await kadenaClient.local(signedTx as ICommand);
+      console.log(localRes.result);
 
-      const response = await kadenaClient.listen(transactionDescriptor);
+    //   const transactionDescriptor = await kadenaClient.submit(signedTx as ICommand);
+    //   console.log("broadcasting transaction...", transactionDescriptor);
 
-      if (response.result.status === "failure") {
-        console.error(response.result.error);
-      } else {
-        console.log("transaction start success! response:", response);
-        getBalance(userInfo.accountName, selectedChainId).then(setBalance);
-        await handleSendXTransactionFinish(transactionDescriptor);
-      }
+    //   const response = await kadenaClient.listen(transactionDescriptor);
+
+    //   if (response.result.status === "failure") {
+    //     console.error(response.result.error);
+    //   } else {
+    //     console.log("transaction start success! response:", response);
+    //     getBalance(userInfo.accountName, selectedChainId).then(setBalance);
+    //     await handleSendXTransactionFinish(transactionDescriptor);
+    //   }
     } catch (error) {
       console.error("Failed to send transaction", error);
       setXDisabled(false);
@@ -327,7 +335,7 @@ function App() {
       ) : (
         <div>
           <div className="container">
-            <h1>Current user: {userInfo?.email}</h1>
+            <h1>Current user: {userInfo?.email || 'SpireKey user'}</h1>
             <button onClick={logout}>Logout</button>
           </div>
           <div className="container">
@@ -366,7 +374,7 @@ function App() {
                 getBalance(
                   (userInfo as KadenaUserMetadata).accountName,
                   selectedChainId
-                )
+                ).then(setBalance)
               }
             >
               Refresh Balance
