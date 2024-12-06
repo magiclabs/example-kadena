@@ -6,7 +6,7 @@
     "@kadena/client": "^1.14.0",
     "@kadena/pactjs": "^0.4.3",
     "@kadena/types": "^0.7.0",
-    "@magic-ext/kadena": "0.9.0-canary.835.12185340364.0",
+    "@magic-ext/kadena": "0.9.0-canary.835.12201004724.0",
     "magic-sdk": "28.19.0-canary.835.11980874875.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"

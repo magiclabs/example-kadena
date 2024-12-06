@@ -170,6 +170,12 @@ function App() {
       const signedTx = await signTransaction(transaction);
       console.log("signed transaction", signedTx);
 
+      // See if transaction will succeed locally before broadcasting
+      const localRes = await kadenaClient.local(signedTx as ICommand);
+      if (localRes.result.status === "failure") {
+        throw new Error((localRes.result.error as { message: string }).message);
+      }
+
       const transactionDescriptor = await kadenaClient.submit(signedTx as ICommand);
       console.log("broadcasting transaction...", transactionDescriptor);
 
@@ -224,21 +230,24 @@ function App() {
       const signedTx = await signTransaction(transaction);
       console.log("signed transaction", signedTx);
 
+      // See if transaction will succeed locally before broadcasting
       const localRes = await kadenaClient.local(signedTx as ICommand);
-      console.log(localRes.result);
+      if (localRes.result.status === "failure") {
+        throw new Error((localRes.result.error as { message: string }).message);
+      }
 
-    //   const transactionDescriptor = await kadenaClient.submit(signedTx as ICommand);
-    //   console.log("broadcasting transaction...", transactionDescriptor);
+      const transactionDescriptor = await kadenaClient.submit(signedTx as ICommand);
+      console.log("broadcasting transaction...", transactionDescriptor);
 
-    //   const response = await kadenaClient.listen(transactionDescriptor);
+      const response = await kadenaClient.listen(transactionDescriptor);
 
-    //   if (response.result.status === "failure") {
-    //     console.error(response.result.error);
-    //   } else {
-    //     console.log("transaction start success! response:", response);
-    //     getBalance(userInfo.accountName, selectedChainId).then(setBalance);
-    //     await handleSendXTransactionFinish(transactionDescriptor);
-    //   }
+      if (response.result.status === "failure") {
+        console.error(response.result.error);
+      } else {
+        console.log("transaction start success! response:", response);
+        getBalance(userInfo.accountName, selectedChainId).then(setBalance);
+        await handleSendXTransactionFinish(transactionDescriptor);
+      }
     } catch (error) {
       console.error("Failed to send transaction", error);
       setXDisabled(false);
