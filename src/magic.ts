@@ -8,11 +8,11 @@ export const createMagic = (chainId?: ChainId) => {
   return new Magic("pk_live_FAE58C542213B8AF", {
     extensions: [
       new KadenaExtension({
-      rpcUrl: getRpcUrl(chainId),
-      chainId: chainId || DEFAULT_CHAIN_ID,
-      networkId: NETWORK_ID,
-      createAccountsOnChain: true,
-    }),
+        rpcUrl: getRpcUrl(chainId),
+        chainId: chainId || DEFAULT_CHAIN_ID,
+        networkId: NETWORK_ID,
+        createAccountsOnChain: true,
+      }),
     ],
   });
 };
