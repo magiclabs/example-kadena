@@ -1859,29 +1859,29 @@
   resolved "https://registry.npmjs.org/@leichtgewicht/ip-codec/-/ip-codec-2.0.5.tgz"
   integrity sha512-Vo+PSpZG2/fmgmiNzYK9qWRh8h/CHrwD0mo1h1DzL4yzHNSfWYujGTYsWGreD000gcgmZ7K4Ys6Tx9TxtsKdDw==
 
-"@magic-ext/kadena@0.9.0-canary.835.12201004724.0":
-  version "0.9.0-canary.835.12201004724.0"
-  resolved "https://registry.yarnpkg.com/@magic-ext/kadena/-/kadena-0.9.0-canary.835.12201004724.0.tgz#59f4536b3f0eb9982285ad9c2303826fdff59034"
-  integrity sha512-cLCi9oEigvdKqvjnYynzMOIuYQif6bS+B8L8uR8ZoLt7u+ejwxS6YkWfBhon8ANeOEj/aZmNF87liHzFn5fO6Q==
+"@magic-ext/kadena@0.9.0":
+  version "0.9.0"
+  resolved "https://registry.yarnpkg.com/@magic-ext/kadena/-/kadena-0.9.0.tgz#626d319df24d896000576f37cc3893b93c781e0d"
+  integrity sha512-lNC2cp7ryqMOiFeGaPF+zWaqmNBSUaognDBqn97cdGngCipY5INcVV+DKSIUSI69IdV32CDowqsu9o+ExxBoIg==
 
-"@magic-sdk/commons@24.18.0-canary.835.11980874875.0":
-  version "24.18.0-canary.835.11980874875.0"
-  resolved "https://registry.yarnpkg.com/@magic-sdk/commons/-/commons-24.18.0-canary.835.11980874875.0.tgz#33f52634b3dce15348013a9de5c3ce27a2361683"
-  integrity sha512-19asxC3z3teknfvZJL0IJGn0PkwCgyfK3LrmphHkeGvz0dE0mAJ7bGtLiNz3UthwQoJxUaITiY+fXGAl4HoEGA==
+"@magic-sdk/commons@^24.18.1":
+  version "24.18.1"
+  resolved "https://registry.yarnpkg.com/@magic-sdk/commons/-/commons-24.18.1.tgz#a7177723fb2aea82c22bf7c03522d04ed0ade25a"
+  integrity sha512-0m2pgPu39BEPLfH/gyuVVgQF1WPBJWfKA65N5tfFCqJ2L+nZVKRmw+kg+Q5H8dMIqLY32sTD0cvjwJxYzPCHQA==
 
-"@magic-sdk/provider@28.18.0-canary.835.11980874875.0":
-  version "28.18.0-canary.835.11980874875.0"
-  resolved "https://registry.yarnpkg.com/@magic-sdk/provider/-/provider-28.18.0-canary.835.11980874875.0.tgz#bc60c73f49370fcf3a69592e1070345fdfe500cb"
-  integrity sha512-L8UCVBaB+CIFDAK8bSnr6pCLlPYqMJIsuYTCkxzborr7oBYO9Ff8Idbc/FIQpKGGIMgUiGHrq7CB/2+NbQF4mQ==
+"@magic-sdk/provider@^28.18.1":
+  version "28.18.1"
+  resolved "https://registry.yarnpkg.com/@magic-sdk/provider/-/provider-28.18.1.tgz#2b105a797d53ff8500b448798a15b7728bfb0661"
+  integrity sha512-9NEY7RoVsjXa9xDbLvAe9rxqvDve+3ywTH1rvQgTX7dsoq7REbeXK6UcrxpsV9enAnEqqhvjWAL+Q3PRwoau9A==
   dependencies:
-    "@magic-sdk/types" "24.16.0-canary.835.11980874875.0"
+    "@magic-sdk/types" "^24.16.1"
     eventemitter3 "^4.0.4"
     web3-core "1.5.2"
 
-"@magic-sdk/types@24.16.0-canary.835.11980874875.0":
-  version "24.16.0-canary.835.11980874875.0"
-  resolved "https://registry.yarnpkg.com/@magic-sdk/types/-/types-24.16.0-canary.835.11980874875.0.tgz#2f89bba639033627de04b79006a4e86a660d99a1"
-  integrity sha512-/5xPS5Oivbiej+42aRNIMvJBKB83OJoWKeBuQKtlYjVEjcbC7Kdc7d5hety5KQs3jgPl2Loq7Ov9i+tzzMU3cQ==
+"@magic-sdk/types@^24.16.1":
+  version "24.16.1"
+  resolved "https://registry.yarnpkg.com/@magic-sdk/types/-/types-24.16.1.tgz#aa8c4382194e121bdd8e0c22a0ee9dee3f926c4c"
+  integrity sha512-XpdL6P36N7XYTiffhvzs49HbhA3uPro4ApcTF6xxk1VNv2L6v28Dg7FnNa8qib0FGHrypZVKK2cWpX6ioi5ZpA==
 
 "@nicolo-ribaudo/eslint-scope-5-internals@5.1.1-v1":
   version "5.1.1-v1"
@@ -7717,14 +7717,14 @@ lru-cache@^5.1.1:
   dependencies:
     yallist "^3.0.2"
 
-magic-sdk@28.19.0-canary.835.11980874875.0:
-  version "28.19.0-canary.835.11980874875.0"
-  resolved "https://registry.yarnpkg.com/magic-sdk/-/magic-sdk-28.19.0-canary.835.11980874875.0.tgz#1c8dd4e41d3c72417d49fe06d132dd4a323eb584"
-  integrity sha512-E7V43F7zq84b8A9OWbGHz5UupZgmNJ/H50wouWnm+eOM7tLtT02PGNsGVODwTiwnP6rYqBDYHHoQ1L9tisuSHw==
+magic-sdk@28.19.1:
+  version "28.19.1"
+  resolved "https://registry.yarnpkg.com/magic-sdk/-/magic-sdk-28.19.1.tgz#d94155a79858334dfe54966bc3b1f28685f425fa"
+  integrity sha512-a94WqJ6mvSwynekwVfM/diKXCbkieKvCdp/CRDLqlPWEmbv+yLhZiW3B3gwk8nLWjGHZrL/4uCgOHvaZQm05Ng==
   dependencies:
-    "@magic-sdk/commons" "24.18.0-canary.835.11980874875.0"
-    "@magic-sdk/provider" "28.18.0-canary.835.11980874875.0"
-    "@magic-sdk/types" "24.16.0-canary.835.11980874875.0"
+    "@magic-sdk/commons" "^24.18.1"
+    "@magic-sdk/provider" "^28.18.1"
+    "@magic-sdk/types" "^24.16.1"
     localforage "^1.7.4"
 
 magic-string@^0.25.0, magic-string@^0.25.7:
@@ -10177,7 +10177,16 @@ string-natural-compare@^3.0.1:
   resolved "https://registry.npmjs.org/string-natural-compare/-/string-natural-compare-3.0.1.tgz"
   integrity sha512-n3sPwynL1nwKi3WJ6AIsClwBMa0zTi54fn2oLU6ndfTSIO05xaznjSf15PcBZU6FNWbmN5Q6cxT4V5hGvB4taw==
 
-"string-width-cjs@npm:string-width@^4.2.0", string-width@^4.1.0, string-width@^4.2.0:
+"string-width-cjs@npm:string-width@^4.2.0":
+  version "4.2.3"
+  resolved "https://registry.npmjs.org/string-width/-/string-width-4.2.3.tgz"
+  integrity sha512-wKyQRQpjJ0sIp62ErSZdGsjMJWsap5oRNihHhu6G7JVO/9jIB6UyevL+tXuOqrng8j/cxKTWyWUwvSTriiZz/g==
+  dependencies:
+    emoji-regex "^8.0.0"
+    is-fullwidth-code-point "^3.0.0"
+    strip-ansi "^6.0.1"
+
+string-width@^4.1.0, string-width@^4.2.0:
   version "4.2.3"
   resolved "https://registry.npmjs.org/string-width/-/string-width-4.2.3.tgz"
   integrity sha512-wKyQRQpjJ0sIp62ErSZdGsjMJWsap5oRNihHhu6G7JVO/9jIB6UyevL+tXuOqrng8j/cxKTWyWUwvSTriiZz/g==
@@ -10280,7 +10289,14 @@ stringify-object@^3.3.0:
     is-obj "^1.0.1"
     is-regexp "^1.0.0"
 
-"strip-ansi-cjs@npm:strip-ansi@^6.0.1", strip-ansi@^6.0.0, strip-ansi@^6.0.1:
+"strip-ansi-cjs@npm:strip-ansi@^6.0.1":
+  version "6.0.1"
+  resolved "https://registry.npmjs.org/strip-ansi/-/strip-ansi-6.0.1.tgz"
+  integrity sha512-Y38VPSHcqkFrCpFnQ9vuSXmquuv5oXOKpGeT6aGrr3o3Gc9AlVa6JBfUSOCnbxGGZF+/0ooI7KrPuUSztUdU5A==
+  dependencies:
+    ansi-regex "^5.0.1"
+
+strip-ansi@^6.0.0, strip-ansi@^6.0.1:
   version "6.0.1"
   resolved "https://registry.npmjs.org/strip-ansi/-/strip-ansi-6.0.1.tgz"
   integrity sha512-Y38VPSHcqkFrCpFnQ9vuSXmquuv5oXOKpGeT6aGrr3o3Gc9AlVa6JBfUSOCnbxGGZF+/0ooI7KrPuUSztUdU5A==
@@ -11567,7 +11583,16 @@ workbox-window@6.6.1:
     "@types/trusted-types" "^2.0.2"
     workbox-core "6.6.1"
 
-"wrap-ansi-cjs@npm:wrap-ansi@^7.0.0", wrap-ansi@^7.0.0:
+"wrap-ansi-cjs@npm:wrap-ansi@^7.0.0":
+  version "7.0.0"
+  resolved "https://registry.npmjs.org/wrap-ansi/-/wrap-ansi-7.0.0.tgz"
+  integrity sha512-YVGIj2kamLSTxw6NsZjoBxfSwsn0ycdesmc4p+Q21c5zPuZ1pl+NfxVdxPtdHvmNVOQ6XSYG4AUtyt/Fi7D16Q==
+  dependencies:
+    ansi-styles "^4.0.0"
+    string-width "^4.1.0"
+    strip-ansi "^6.0.0"
+
+wrap-ansi@^7.0.0:
   version "7.0.0"
   resolved "https://registry.npmjs.org/wrap-ansi/-/wrap-ansi-7.0.0.tgz"
   integrity sha512-YVGIj2kamLSTxw6NsZjoBxfSwsn0ycdesmc4p+Q21c5zPuZ1pl+NfxVdxPtdHvmNVOQ6XSYG4AUtyt/Fi7D16Q==
