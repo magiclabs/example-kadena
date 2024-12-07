@@ -220,7 +220,7 @@ function App() {
   const handleSendXTransactionStart = async () => {
     if (!userInfo?.accountName) return;
 
-    // setXDisabled(true);
+    setXDisabled(true);
 
     try {
       const kadenaClient = getKadenaClient(selectedChainId);
