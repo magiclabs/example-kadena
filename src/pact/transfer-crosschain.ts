@@ -1,4 +1,4 @@
-import { ChainId, Pact, ISigner, literal } from "@kadena/client";
+import { ChainId, Pact, ISigner, literal, readKeyset } from "@kadena/client";
 import { NETWORK_ID } from "../utils/constants";
 import { IPactDecimal } from "@kadena/types";
 
@@ -23,7 +23,7 @@ export const buildTransferCrosschainTransaction = ({
   receiverPubKey,
   isSpireKeyAccount,
 }: TransferCrosschainTransaction) => {
-  
+
   const signer: ISigner = isSpireKeyAccount
     ? {
         pubKey: senderPubKey,
@@ -31,16 +31,14 @@ export const buildTransferCrosschainTransaction = ({
       }
     : senderPubKey;
 
+  const guard = isSpireKeyAccount ? literal(`(keyset-ref-guard "${to.substring(2)}")`) : readKeyset("receiverKeyset");
+
   return Pact.builder
     .execution(
       (Pact.modules as any).coin.defpact["transfer-crosschain"](
         from,
         to,
-        literal(
-          `(at 'guard (coin.details
-              "${to}"
-            ))`
-        ),
+        guard,
         toChainId,
         amount
       )
@@ -49,7 +47,7 @@ export const buildTransferCrosschainTransaction = ({
       signFor("coin.GAS"),
       signFor("coin.TRANSFER_XCHAIN", from, to, amount, toChainId),
     ])
-    .addKeyset("receiver-guard", "keys-all", receiverPubKey)
+    .addKeyset("receiverKeyset", "keys-all", receiverPubKey)
     .setMeta({ chainId: fromChainId, senderAccount: from })
     .setNetworkId(NETWORK_ID)
     .createTransaction();

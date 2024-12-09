@@ -344,7 +344,7 @@ function App() {
       ) : (
         <div>
           <div className="container">
-            <h1>Current user: {userInfo?.email || 'SpireKey user'}</h1>
+            <h1>Current user: {userInfo?.email || userInfo?.spireKeyInfo?.alias}</h1>
             <button onClick={logout}>Logout</button>
           </div>
           <div className="container">
