@@ -145,11 +145,8 @@ function App() {
     const isSpireKeyLogin = Boolean(userInfo?.loginType === "spirekey");
 
     if (isSpireKeyLogin) {
-      const signature = await magic.kadena.signTransactionWithSpireKey(transaction);
-      return addSignatures(
-        transaction,
-        ...(signature.transactions[0] as SignedCommand).sigs
-      );
+      const { transactions } = await magic.kadena.signTransactionWithSpireKey(transaction);
+      return transactions[0];
     } else {
       const signature = await magic.kadena.signTransaction(transaction.hash);
       return addSignatures(transaction, signature);
