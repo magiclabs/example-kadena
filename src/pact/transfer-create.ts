@@ -1,5 +1,5 @@
 import { ChainId, IPactDecimal } from "@kadena/types";
-import { Pact, ISigner, literal, readKeyset } from "@kadena/client";
+import { Pact, ISigner, literal } from "@kadena/client";
 import { NETWORK_ID } from "../utils/constants";
 
 interface TransferCreateTransaction {
@@ -29,18 +29,20 @@ export const buildTransferCreateTransaction = ({
       }
     : senderPubKey;
 
-  const guard = isSpireKeyAccount ? literal(`(keyset-ref-guard "${to.substring(2)}")`) : readKeyset("receiverKeyset");
-
   return Pact.builder
     .execution(
       (Pact.modules as any).coin["transfer-create"](
         from,
         to,
-        guard,
+        literal(
+          `(at 'guard (coin.details
+              "${to}"
+            ))`
+        ),
         amount
       )
     )
-    .addKeyset("receiverKeyset", "keys-all", receiverPubKey)
+    .addKeyset("receiver-guard", "keys-all", receiverPubKey)
     .addSigner(signer, (withCapability: any) => [
       withCapability("coin.GAS"),
       withCapability("coin.TRANSFER", from, to, amount),
